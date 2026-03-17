@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
-import { SecurityEnrollmentUnexpectedError } from './errors/secuity-enrollment-unexpected.error';
 import { SecurityEnrollmentAlreadyExistsError } from './errors/security-enrollment-already-exists.error';
 import { SecurityEnrollmentUnavailableError } from './errors/security-enrollment-unavailable.error';
+import { SecurityEnrollmentUnexpectedError } from './errors/security-enrollment-unexpected.error';
 
 type ProviderErrorBody = {
   semCode?: string;
