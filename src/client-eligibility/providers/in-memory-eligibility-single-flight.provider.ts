@@ -2,9 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { EligibilityModel } from "../model/eligibility.model";
 import { EligibilityRepository } from "../repositories/eligibility.repository";
 import { EligibilityDto } from "../model/eligibility.dto";
+import { EligibilitySingleFlightProvider } from "./eligibility-single-flight.provider";
 
 @Injectable()
-export class InMemoryEligibilitySingleFlightProvider {
+export class InMemoryEligibilitySingleFlightProvider implements EligibilitySingleFlightProvider {
     private readonly inflight = new Map<string, Promise<EligibilityModel>>();
     private readonly cache = new Map<string, { expiresAt: number, data: EligibilityModel }>();
 
