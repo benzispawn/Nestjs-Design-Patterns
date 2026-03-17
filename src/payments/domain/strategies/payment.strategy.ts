@@ -1,3 +1,4 @@
+import { PaymentMethod } from "../enums/payment-mehtod.enum";
 import { PaymentProvider } from "../enums/payment-provider.enum";
 import { PaymentStatus } from "../enums/payment-status.enum";
 
@@ -13,5 +14,6 @@ export interface ExecutePaymentResult {
 }
 
 export interface PaymentStrategy {
+    supports(method: PaymentMethod): boolean;
     execute(input: ExecutePaymentInput): Promise<ExecutePaymentResult>;
 }
