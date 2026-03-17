@@ -1,5 +1,6 @@
-import { PaymentMethod } from "../../domain/enums/payment-mehtod.enum";
-import { PaymentStatus } from "../../domain/enums/payment-status.enum";
+import { PaymentMethod } from "../enums/payment-mehtod.enum";
+import { PaymentProvider } from "../enums/payment-provider.enum";
+import { PaymentStatus } from "../enums/payment-status.enum";
 
 export interface GatewayChargeInput {
     amount: number;
@@ -13,5 +14,6 @@ export interface GatewayChargeResult {
 }
 
 export interface PaymentGateway {
+    readonly provider: PaymentProvider;
     charge(input: GatewayChargeInput): Promise<GatewayChargeResult>;
 }
