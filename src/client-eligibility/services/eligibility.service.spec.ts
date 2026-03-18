@@ -1,6 +1,6 @@
 import { EligibilityService } from "./eligibility.service";
-import { InMemoryEligibilitySingleFlightProvider } from "../providers/in-memory-eligibility-single-flight.provider";
 import { EligibilityModel } from "../model/eligibility.model";
+import { EligibilitySingleFlightProvider } from "../providers/eligibility-single-flight.provider";
 
 describe("EligibilityService", () => {
     let service: EligibilityService;
@@ -12,7 +12,7 @@ describe("EligibilityService", () => {
         };
 
         service = new EligibilityService(
-            providerMock as unknown as InMemoryEligibilitySingleFlightProvider,
+            providerMock as unknown as EligibilitySingleFlightProvider,
         );
     });
 

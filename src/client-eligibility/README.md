@@ -12,12 +12,15 @@ Each endpoint uses the same eligibility decision and returns the screen identifi
 
 ## Request Flow
 1. `EligibilityController` receives the request and reads `req.user.id` and optional `req.user.tenantId`.
-2. `EligibilityService` delegates to the in-memory single-flight provider.
-3. `InMemoryEligibilitySingleFlightProvider`:
+2. `EligibilityService` delegates to a single-flight provider through DI token.
+3. Provider strategy is selected manually in `client-eligibility.module.ts`:
+- `memory` -> `InMemoryEligibilitySingleFlightProvider`
+- `redis` -> `RedisEligibilitySingleFlightProvider`
+4. Selected provider:
 - checks short-lived cache
-- checks in-flight map (single-flight deduplication)
+- checks in-flight state (memory map or Redis lock)
 - if needed, calls repository once and stores result in cache
-4. `EligibilityRepository` performs the evaluation and returns the eligibility model.
+5. `EligibilityRepository` performs the evaluation and returns the eligibility model.
 
 ## Single-Flight and Cache Logic
 `InMemoryEligibilitySingleFlightProvider` has two in-memory maps:
@@ -31,6 +34,29 @@ Behavior:
 
 This prevents duplicated repository calls when multiple simultaneous requests arrive for the same user.
 
+## Redis Single-Flight (In Progress)
+`RedisEligibilitySingleFlightProvider` uses:
+- cache key: `eligibility:{userId}`
+- lock key: `eligibility:lock:{userId}`
+
+Behavior:
+- read cache from Redis first
+- acquire lock with `NX` + short TTL
+- lock owner evaluates repository and writes cache
+- lock contenders wait/poll briefly for cache to appear
+- if wait times out, fallback evaluates and stores cache
+
+Config via env vars:
+- `REDIS_HOST` (default `127.0.0.1`)
+- `REDIS_PORT` (default `6379`)
+- `REDIS_USERNAME` (optional)
+- `REDIS_PASSWORD` (optional)
+- `REDIS_DB` (default `0`)
+- `ELIGIBILITY_CACHE_TTL_SECONDS` (default `10`)
+- `ELIGIBILITY_LOCK_TTL_MS` (default `5000`)
+- `ELIGIBILITY_LOCK_WAIT_TIMEOUT_MS` (default `7000`)
+- `ELIGIBILITY_LOCK_POLL_MS` (default `100`)
+
 ## Simultaneous Requests
 - Same user, simultaneous calls (`/screen-a`, `/screen-b`, `/screen-c`): repository evaluation is expected to run once.
 - Different users, simultaneous calls: repository evaluation runs once per distinct user.
@@ -38,7 +64,7 @@ This prevents duplicated repository calls when multiple simultaneous requests ar
 This behavior is covered by unit and e2e tests.
 
 ## Important Limitation
-The current cache/single-flight approach is **in-memory and per instance**.
+The default strategy remains **in-memory and per instance**.
 
 That means it is suitable for **vertical scaling context only** (single process/instance with more CPU/RAM), but it does not coordinate state across multiple instances.
 
@@ -47,10 +73,20 @@ In horizontal/distributed deployments:
 - deduplication is not global
 - restarts clear all cached state
 
-## Future Direction
-A distributed solution is planned for next iterations, for example:
-- shared cache (e.g., Redis) with TTL
-- distributed lock/single-flight strategy per user key
-- consistent behavior across multiple instances/pods
+## Manual Strategy Switch
+For now, the switch is intentionally manual in:
+- `src/client-eligibility/client-eligibility.module.ts`
 
-This module intentionally keeps the current implementation simple while preparing for that evolution.
+Update:
+- `const ELIGIBILITY_PROVIDER_STRATEGY: "memory" | "redis" = "memory";`
+
+Set to `"redis"` when Redis is available and configured.
+
+## Docker Redis
+Redis runtime is available via project root `docker-compose.yml`.
+
+Start:
+- `docker compose up -d redis`
+
+Stop:
+- `docker compose stop redis`
