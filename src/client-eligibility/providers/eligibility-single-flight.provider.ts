@@ -1,6 +1,6 @@
-import { EligibilityDto } from "../model/eligibility.dto";
-import { EligibilityModel } from "../model/eligibility.model";
+import type { EligibilityDto } from '../model/eligibility.dto';
+import type { EligibilityModel } from '../model/eligibility.model';
 
 export interface EligibilitySingleFlightProvider {
-    getEligibility(context: EligibilityDto): Promise<EligibilityModel>;
+  getEligibility(context: EligibilityDto): Promise<EligibilityModel>;
 }

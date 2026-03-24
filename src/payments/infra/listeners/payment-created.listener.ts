@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+
 import { PaymentCreatedEvent } from '../../domain/events/payment-created.event';
 
 @Injectable()

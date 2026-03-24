@@ -1,16 +1,17 @@
-import { Injectable } from "@nestjs/common";
-import { ExecutePaymentInput, ExecutePaymentResult, PaymentStrategy } from "../../domain/strategies/payment.strategy";
-import { PaymentMethod } from "../../domain/enums/payment-mehtod.enum";
-import { PaymentGatewayFactory } from "../../application/factories/payment-gateway.factory";
-import { GatewayStatusMapper } from "../../application/mappers/gateway-status.mapper";
+import { Injectable } from '@nestjs/common';
 
+import { PaymentGatewayFactory } from '../../application/factories/payment-gateway.factory';
+import { GatewayStatusMapper } from '../../application/mappers/gateway-status.mapper';
+import { PaymentMethod } from '../../domain/enums/payment-mehtod.enum';
+import {
+  ExecutePaymentInput,
+  ExecutePaymentResult,
+  PaymentStrategy,
+} from '../../domain/strategies/payment.strategy';
 
 @Injectable()
 export class CreditCardPaymentStrategy implements PaymentStrategy {
-
-  constructor(
-    private readonly paymentGatewayFactory: PaymentGatewayFactory,
-  ) {}
+  constructor(private readonly paymentGatewayFactory: PaymentGatewayFactory) {}
 
   supports(method: PaymentMethod): boolean {
     return method === PaymentMethod.CREDIT_CARD;
@@ -29,5 +30,4 @@ export class CreditCardPaymentStrategy implements PaymentStrategy {
       externalId: result.externalId,
     };
   }
-
 }
